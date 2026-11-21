@@ -65,14 +65,14 @@ export async function getTodayWeather(city: string): Promise<TodayWeather> {
   forecast.searchParams.set("temperature_unit", "celsius");
   forecast.searchParams.set("forecast_days", "1");
   const current = (await fetchJson<ForecastResponse>(forecast.toString())).current;
-  if (!current || !Number.isFinite(current.temperature_2m) || !Number.isFinite(current.weather_code)) {
+  if (!current || typeof current.temperature_2m !== "number" || !Number.isFinite(current.temperature_2m) || typeof current.weather_code !== "number" || !Number.isFinite(current.weather_code)) {
     throw new Error("Current weather is unavailable.");
   }
 
   const weather = {
     city: location.name,
-    temperature: Math.round(current.temperature_2m!),
-    condition: describeWeather(current.weather_code!),
+    temperature: Math.round(current.temperature_2m),
+    condition: describeWeather(current.weather_code),
   };
 
   await LocalStorage.setItem(cacheKey, JSON.stringify({ updatedAt: Date.now(), value: weather }));
