@@ -1,5 +1,11 @@
-
 # Persian Calendar Changelog
+
+## [Unreleased]
+
+- Refined monthly calendar colors, weekday headers, date hierarchy, and today/Friday states.
+- Added optional current weather to the Today's Date search subtitle for a manually configured city.
+- Added local caching and offline fallback so weather never blocks the Persian date.
+- Preserved `چندمه`, month navigation, and existing copy actions.
 
 ## [Initial Release] - 2026-11-21
 
