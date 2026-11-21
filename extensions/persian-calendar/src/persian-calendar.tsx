@@ -13,6 +13,16 @@ import {
   WEEKDAYS,
 } from "./jalali";
 
+// Color is used sparingly. Dates, not decorative icons, remain the focal point.
+const PALETTE = {
+  regular: "#E4E9EE",
+  weekend: "#E9C99D",
+  today: "#238A88",
+  weekdayHeader: "#D5DFE7",
+  fridayHeader: "#E4B87E",
+  placeholder: "#F4F5F7",
+};
+
 export default function Command() {
   const today = getIranToday();
   const [monthOffset, setMonthOffset] = useState(0);
@@ -37,35 +47,34 @@ export default function Command() {
   const nextMonth = () => openMonth(monthOffset + 1);
   const jumpToToday = () => openMonth(0);
 
-  function navigationActions() {
-    return (
-      <ActionPanel>
-        <Action title="Go to Today" onAction={jumpToToday} />
-        <Action title="Previous Month" onAction={previousMonth} />
-        <Action title="Next Month" onAction={nextMonth} />
-      </ActionPanel>
-    );
-  }
+  const navigationActions = () => (
+    <ActionPanel>
+      <Action title="Go to Today" onAction={jumpToToday} />
+      <Action title="Previous Month" onAction={previousMonth} />
+      <Action title="Next Month" onAction={nextMonth} />
+    </ActionPanel>
+  );
 
   return (
     <Grid
       columns={7}
+      aspectRatio="1"
       filtering={false}
       selectedItemId={selectedItemId}
       onSelectionChange={(id) => {
         if (id) setSelectedItemId(id);
       }}
-      searchBarPlaceholder="Browse Persian dates (Iran time)"
+      searchBarPlaceholder="Browse the Persian calendar"
     >
       <Grid.Section
         title={`${MONTH_NAMES[jm - 1]} ${faDigits(jy)}`}
-        subtitle="Based on Iran time • Fridays are highlighted in orange"
+        subtitle="Saturday to Friday · Teal marks today · Gold marks Friday"
       >
         {SHORT_WEEKDAYS.map((label, index) => (
           <Grid.Item
             key={`weekday-${index}`}
             id={`weekday-${index}`}
-            content="🗓️"
+            content={{ color: index === 6 ? PALETTE.fridayHeader : PALETTE.weekdayHeader }}
             title={label}
             subtitle={WEEKDAYS[index]}
             actions={navigationActions()}
@@ -76,7 +85,7 @@ export default function Command() {
           <Grid.Item
             key={`empty-${index}`}
             id={`empty-${index}`}
-            content="▫️"
+            content={{ color: PALETTE.placeholder }}
             title=" "
             actions={navigationActions()}
           />
@@ -93,20 +102,20 @@ export default function Command() {
           const markdown = [
             `# ${weekday}، ${faDigits(jd)} ${MONTH_NAMES[jm - 1]} ${faDigits(jy)}`,
             "",
-            `**Jalali Date:** ${persianDate}`,
+            isToday ? "**Today · Iran time**" : "",
             "",
-            `**Gregorian Date:** ${gregorianDate}`,
+            `**Persian date:** ${persianDate}`,
             "",
-            isToday ? "📍 Today (Iran time)" : "",
-          ].join("\n");
+            `**Gregorian date:** ${gregorianDate}`,
+          ].filter(Boolean).join("\n");
 
           return (
             <Grid.Item
               key={`${jy}-${jm}-${jd}`}
               id={`${jy}-${jm}-${jd}`}
-              content={isToday ? "🟢" : isFriday ? "🟠" : "🔹"}
-              title={faDigits(jd)}
-              subtitle={faDigits(`${g.gm}/${g.gd}`)}
+              content={{ color: isToday ? PALETTE.today : isFriday ? PALETTE.weekend : PALETTE.regular }}
+              title={`${faDigits(jd)}${isToday ? " · امروز" : ""}`}
+              subtitle={isToday ? "Today" : isFriday ? "Friday" : undefined}
               keywords={[String(jd), persianDate, gregorianDate, MONTH_NAMES[jm - 1]]}
               actions={
                 <ActionPanel>
@@ -118,25 +127,21 @@ export default function Command() {
                         markdown={markdown}
                         actions={
                           <ActionPanel>
-                            <Action.CopyToClipboard title="Copy Jalali Date" content={persianDate} />
+                            <Action.CopyToClipboard title="Copy Persian Date" content={persianDate} />
                             <Action.CopyToClipboard title="Copy Gregorian Date" content={gregorianDate} />
                           </ActionPanel>
                         }
                       />
                     }
                   />
-                  <Action.CopyToClipboard title="Copy Jalali Date" content={persianDate} />
-                  <Action
-                    title="Next Month"
-                    onAction={nextMonth}
+                  <Action.CopyToClipboard title="Copy Persian Date" content={persianDate} />
+                  <Action title="Next Month" onAction={nextMonth}
                     shortcut={{
                       Windows: { modifiers: ["ctrl", "shift"], key: "arrowRight" },
                       macOS: { modifiers: ["cmd", "shift"], key: "arrowRight" },
                     }}
                   />
-                  <Action
-                    title="Previous Month"
-                    onAction={previousMonth}
+                  <Action title="Previous Month" onAction={previousMonth}
                     shortcut={{
                       Windows: { modifiers: ["ctrl", "shift"], key: "arrowLeft" },
                       macOS: { modifiers: ["cmd", "shift"], key: "arrowLeft" },
